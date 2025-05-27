@@ -1,0 +1,216 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Profile{% endblock %}
+{% block content %}
+
+
+
+<style>
+    .profile-section {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .profile-picture {
+        width: 100px;
+        height: 100px;
+        border: 1px solid rgba(252, 241, 246, 0.25);
+        object-fit: cover;
+        margin-bottom: 10px;
+        background-color: rgba(252, 241, 246, 0.25);
+    }
+
+    #profile-picture-upload {
+        display: none;
+    }
+
+    .upload {
+        color: white;
+        cursor: pointer;
+        font-size: 17px;
+        padding: 2px 10px;
+        border: 1px solid rgba(252, 241, 246, 0.25);
+        background-color: #6610F2;
+        border-radius: 3px;
+    }
+
+    .post-blog {
+        background-color: #6610F2;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        height: 50px;
+        width: 100px;
+    }
+    .name-a:hover {
+        color: #6610F2 !important;
+    }
+</style>
+
+<div class="wrap">
+    <section class="site-section pt-5">
+        <div class="container">
+            <div class="row blog-entries">
+                <div class="col-md-12 col-lg-8 main-content">
+                    <div class="row">
+                        <div class="col-md-12">
+                            
+                            <p class="mb-5">
+                                {% if user_profile.profile.image %}
+                                <img src="{{ user_profile.profile.image.url }}" width="400px" alt="Image placeholder"
+                                    class="img-fluid">
+                                {% endif %}
+                            </p>
+                            <h2 class="mb-4">Hi I'm {{ user_profile.first_name }} {{ user_profile.last_name }}
+                            </h2>
+                            {% if user_profile.profile.image %}
+                            <p>{{ user_profile.profile.bio }}</p>
+                            {% endif %}
+
+                        </div>
+                    </div>
+
+                    <div class="row mb-5 mt-5">
+                        <div class="col-md-12 ">
+                            <h2>My Latest Posts</h2>
+                        </div>
+                        <div class="col-md-12">
+                            {% if blog %} 
+                            {% for i in blog %}
+                            <div class="post-entry-horzontal">
+                                <div class="blog_details">
+                                    {% if i.images.all %}
+                                    {% with i.images.all|first as first_image %}
+                                    <a href="{% url 'blog_details' slug=i.slug %}">
+                                        <div class="image"><img width="200px" class="mt-3" src="{{ first_image.image.url }}" alt=""></div>
+                                    </a>
+                                    {% endwith %}
+                                    {% endif %}
+                                    <span class="text">
+                                        <div class="post-meta">
+                                            <span class="author mr-2">
+                                                <a style="color: #B3B3B3;" class="name-a"
+                                                    href="{% url 'view_user_profile' username=i.author.username %}">
+                                                    <img src="{{ i.author.profile.image.url }}" alt="Colorlib">
+                                                    {{ i.author }}</a></span>&bullet;
+                                            <a style="color: #B3B3B3;" href="{% url 'blog_details' slug=i.slug %}">
+                                                <span class="mr-2">{{ i.created_at }}</span> &bullet;
+                                                <span class="ml-2"><span class="fa fa-comments"></span>
+                                                    {{ i.comments.count }}</span>
+                                                <span class="ml-2"><span class="fa fa-eye"></span>
+                                                    {{ i.views }}</span>
+                                                <span class="ml-2"><span class="fa fa-heart-o"></span>
+                                                    {{ i.likes.count }}</span>
+                                        </div>
+                                        <h2>{{ i.short_title }}...</h2>
+                                        </a>
+                                    </span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                            {% else %}
+                                <p>No posts available.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar -->
+                <div class="col-md-12 col-lg-4 sidebar">
+                    <div class="sidebar-box search-form-wrap">
+                        <form action="#" class="search-form">
+                            <div class="form-group">
+                                <span class="icon fa fa-search"></span>
+                                <input type="text" class="form-control" id="s"
+                                    placeholder="Type a keyword and hit enter">
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="sidebar-box">
+                        <div class="bio text-center">
+                            <div id="profilePictureBlock">
+                                {% if user_profile.profile.image %}
+                                <img id="profile-picture-preview" src="{{ user_profile.profile.image.url }}" alt=""
+                                    class="profile-picture">
+                                {% else %}
+                                <img id="profile-picture-preview" src="{% static 'images/default2.jpg' %}" alt=""
+                                    class="profile-picture">
+                                {% endif %}
+                            </div>
+
+                            <div class="bio-body">
+                                <div id="profileInfo">
+                                    <h2 class="mt-4">{{ user_profile.first_name }} {{ user_profile.last_name }}</h2>
+                                </div>
+
+                                
+
+                                <p class="social mt-5">
+                                    <a href="#" class="p-2"><span class="fa fa-facebook"></span></a>
+                                    <a href="#" class="p-2"><span class="fa fa-twitter"></span></a>
+                                    <a href="#" class="p-2"><span class="fa fa-instagram"></span></a>
+                                    <a href="#" class="p-2"><span class="fa fa-youtube-play"></span></a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-box">
+                        <h3 class="heading">Popular Posts</h3>
+                        <div class="post-entry-sidebar">
+                            <ul>
+
+
+                                {% if popular_blogs %}
+                                {% for blog in popular_blogs %}
+                                <li>
+                                    <a href="{% url 'blog_details' blog.slug %}">
+                                        {% if blog.images.all %}
+                                        <img src="{{ blog.images.all.0.image.url }}" alt="Image placeholder" class="mr-4">
+                                        {% else %}
+                                        <img src="{% static 'images/default.jpg' %}" alt="Image placeholder" class="mr-4">
+                                        {% endif %}
+                                        <div class="text">
+                                            <h4>{{ blog.short_title }}...</h4>
+                                            <div class="post-meta">
+                                                <span class="mr-2">{{ blog.created_at|date:"F d, Y" }}</span>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </li>
+                                {% endfor %}
+                                {% else %}
+                                <li>
+                                    <p>No popular posts available.</p>
+                                </li>
+                                {% endif %}
+
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<script>
+    function toggleProfile() {
+        const formContainer = document.getElementById("editProfile");
+        const profileInfo = document.getElementById("profileInfo");
+        const profilePictureBlock = document.getElementById("profilePictureBlock");
+        const toggleBtn = document.getElementById("toggle-btn");
+
+        const isHidden = formContainer.style.display === "none" || formContainer.style.display === "";
+
+        formContainer.style.display = isHidden ? "block" : "none";
+        profileInfo.style.display = isHidden ? "none" : "block";
+        profilePictureBlock.style.display = isHidden ? "none" : "block";
+        toggleBtn.textContent = isHidden ? "Hide Form" : "Edit Profile";
+    }
+</script>
+
+{% endblock content %}
