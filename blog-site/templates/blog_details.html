@@ -1,0 +1,337 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Blog Details Page{% endblock %}
+{% block content %}
+
+
+<style>
+    #toggle-comments-btn {
+        cursor: pointer;
+        color: #6610F2;
+    }
+</style>
+
+<section class="site-section py-lg">
+    <div class="container">
+
+        <div class="row blog-entries element-animate">
+
+            <div class="col-md-12 col-lg-8 main-content">
+                <!-- <img src="{{ post.image.url }}" alt="Image" class="img-fluid mb-5"> -->
+                <section class="site-section pt-5 pb-5">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-md-12">
+
+                                <!-- Owl Carousel Slider -->
+                                <div class="owl-carousel owl-theme home-slider mb-4">
+                                    {% for img in post.images.all %}
+                                    <div class="item">
+                                        <a href="#" class="a-block d-flex align-items-center height-lg"
+                                            style="background-image: url('{{ img.image.url }}'); background-size: cover; background-position: center; height: 400px;">
+                                        </a>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+
+                                <!-- Post Meta -->
+                                <div class="post-meta mb-3 d-flex justify-content-between align-items-center mb-4">
+                                    <span class="author mr-2">
+                                        <a href="{% url 'view_user_profile' username=post.author.username %}">
+                                            <img src="{{ post.author.profile.image.url }}" alt="Author" class="mr-2"
+                                                width="40" style="border-radius: 50%;">
+                                            {{ post.author }}
+                                        </a>
+                                    </span>
+                                    &bullet;
+                                    <span class="mr-2">{{ post.created_at }}</span>
+                                    &bullet;
+                                    <span class="ml-2"><span class="fa fa-comments"></span> {{ comments.count }}</span>
+                                    <span class="ml-2"><span class="fa fa-eye"></span> {{ post.views }}</span>
+                                    <span class="ml-2"><span class="fa fa-heart-o"></span> {{ post.likes.count }}</span>
+
+
+                                    <form method="POST" action="{% url 'like_post' post.slug %}" class="mb-4">
+                                        {% csrf_token %}
+                                        {% if user in post.likes.all %}
+                                        <button class="btn btn-danger btn-sm" type="submit"><i
+                                                class="fa fa-heart-o"></i>
+                                            Liked</button>
+                                        {% else %}
+                                        <button class="btn btn-primary btn-sm" type="submit">Like This Blog <i
+                                                class="fa fa-heart-o"></i></button>
+                                        {% endif %}
+                                    </form>
+                                </div>
+
+                                <!-- Post Title -->
+                                <h1 class="mb-4">{{ post.title }}</h1>
+
+
+
+
+
+                                <!-- Post Content -->
+                                <div class="post-content-body">
+                                    <p>{{ post.content|safe }}</p>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+
+
+
+
+
+                <div class="pt-5">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h3 class="mb-0">{{ comments.count }} Comments</h3>
+
+                        {% if comments|length > 3 %}
+                        <a id="toggle-comments-btn" onclick="toggleComments()" class="text-primary"
+                            style="cursor: pointer;">
+                            See all comments
+                        </a>
+                        {% endif %}
+                    </div>
+
+
+                    <ul class="comment-list" id="comment-list">
+                        {% for comment in comments %}
+                        <li class="comment{% if forloop.counter > 3 %} extra-comment{% endif %}"
+                            style="background-color: #f8f9fa; padding: 20px; border-radius: 5px; {% if forloop.counter > 3 %}display: none;{% endif %}">
+                            <div class="vcard">
+                                {% if comment.user.profile.image.url %}
+                                <a href="{% url 'view_user_profile' username=comment.user.username %}">
+                                    <img src="{{ comment.user.profile.image.url }}" alt="{{ comment.user.username }}">
+                                </a>
+                                    {% else %}
+                                    <a href="{% url 'view_user_profile' username=comment.user.username %}">
+                                    <img src="{% static 'images/default.jpg' %}" alt="No Image">
+                                </a>
+                                
+                                {% endif %}
+                            </div>
+                            <div class="comment-body">
+                                <a href="{% url 'view_user_profile' username=comment.user.username %}">
+                                <h3>{{ comment.user.first_name }} {{ comment.user.last_name }}</h3>
+                            </a>
+                                <div class="meta">{{ comment.created_at|date:"F d, Y @ h:i A" }}</div>
+                                <p>{{ comment.body }}</p>
+                                <p>
+                                    <a href="javascript:void(0);" class="reply rounded"
+                                        onclick="toggleReplyForm({{ comment.id }})">Reply</a>
+                                    {% if comment.replies.all %}
+                                    | <a href="javascript:void(0);" class="rounded text-primary"
+                                        onclick="toggleReplies({{ comment.id }})"
+                                        id="toggle-replies-btn-{{ comment.id }}">See all replies</a>
+                                    {% endif %}
+                                </p>
+
+                                <!-- Replies section -->
+                                <div class="nested-reply" id="replies-{{ comment.id }}"
+                                    style="display: none; padding-left: 20px;">
+                                    {% for reply in comment.replies.all %}
+                                    <div class="mb-2 p-2 bg-white border rounded">
+                                        <p class="mb-1">
+                                            <strong>
+                                                <a href="{% url 'view_user_profile' username=reply.user.username %}">
+                                                    <img src="{{ reply.user.profile.image.url }}"
+                                                        alt="{{ reply.user.username }}" width="30"
+                                                        style="border-radius: 50%;">
+                                                    {{ reply.user.username }}
+                                                </a>:
+                                            </strong>
+                                            {{ reply.body }}
+                                        </p>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+
+
+                                <!-- Reply Form -->
+                                <div class="reply-form" id="reply-form-{{ comment.id }}"
+                                    style="display: none; padding-left: 20px;">
+                                    <form method="post" action="{% url 'reply_comment' %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="parent_id" value="{{ comment.id }}">
+                                        <input type="hidden" name="blog_id" value="{{ post.id }}">
+                                        <div class="form-group">
+                                            <input type="text" name="name" class="form-control"
+                                                value="Replying to: {{ comment.user.username }}" readonly>
+                                        </div>
+                                        <div class="form-group">
+                                            <textarea name="body" rows="3" class="form-control"
+                                                placeholder="Write a reply..." required></textarea>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Post Reply</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </li>
+                        {% empty %}
+                        <li>No comments yet. Be the first to comment.</li>
+                        {% endfor %}
+                    </ul>
+
+                    <!-- See all comments button -->
+                    {% if comments|length > 3 %}
+                    <div class="text-center mt-4">
+                        <a id="toggle-comments-btn" onclick="toggleComments()">See all
+                            comments</a>
+                    </div>
+                    {% endif %}
+
+                    <script>
+                        function toggleReplyForm(commentId) {
+                            const form = document.getElementById(`reply-form-${commentId}`);
+                            form.style.display = form.style.display === "none" || form.style.display === "" ? "block" : "none";
+                        }
+
+                        function toggleReplies(commentId) {
+                            const replies = document.getElementById(`replies-${commentId}`);
+                            const toggleBtn = document.getElementById(`toggle-replies-btn-${commentId}`);
+
+                            if (replies.style.display === "none" || replies.style.display === "") {
+                                replies.style.display = "block";
+                                toggleBtn.innerText = "Hide replies";
+                            } else {
+                                replies.style.display = "none";
+                                toggleBtn.innerText = "See all replies";
+                            }
+                        }
+
+                        function toggleComments() {
+                            const extraComments = document.querySelectorAll(".extra-comment");
+                            const toggleBtn = document.getElementById("toggle-comments-btn");
+
+                            const hidden = Array.from(extraComments).some(comment => comment.style.display === "none");
+
+                            extraComments.forEach(comment => {
+                                comment.style.display = hidden ? "block" : "none";
+                            });
+
+                            toggleBtn.innerText = hidden ? "Hide comments" : "See all comments";
+                        }
+                    </script>
+
+
+
+
+                    <!-- END comment-list -->
+
+
+                    <div class="comment-form-wrap pt-5">
+                        <h3 class="mb-5">Leave a comment</h3>
+
+                        {% if user.is_authenticated %}
+                        <form method="post" class="p-5 bg-light">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="message">Comment</label>
+                                <textarea name="body" id="message" cols="30" rows="10" placeholder="Write your comment"
+                                    class="form-control" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <input type="submit" value="Post Comment" class="btn btn-primary">
+                            </div>
+                        </form>
+                        {% else %}
+                        <p>Please <a href="{% url 'login' %}">log in</a> to comment.</p>
+                        {% endif %}
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- END main-content -->
+
+            <div class="col-md-12 col-lg-4 sidebar">
+                <div class="sidebar-box search-form-wrap">
+                    <form action="#" class="search-form">
+                        <div class="form-group">
+                            <span class="icon fa fa-search"></span>
+                            <input type="text" class="form-control" id="s" placeholder="Type a keyword and hit enter">
+                        </div>
+                    </form>
+                </div>
+                <!-- END sidebar-box -->
+                <div class="sidebar-box">
+                    <div class="bio text-center">
+                        <img src="{{ post.author.profile.image.url }}" alt="Image Placeholder" class="img-fluid">
+                        <div class="bio-body">
+                            <h2>{{ post.author.first_name }} {{ post.author.last_name }}</h2>
+                            <p>{{ post.author.profile.bio }}</p>
+                            <p class="social">
+                                <a href="#" class="p-2"><span class="fa fa-facebook"></span></a>
+                                <a href="#" class="p-2"><span class="fa fa-twitter"></span></a>
+                                <a href="#" class="p-2"><span class="fa fa-instagram"></span></a>
+                                <a href="#" class="p-2"><span class="fa fa-youtube-play"></span></a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <!-- END sidebar-box -->
+                <div class="sidebar-box">
+                    <h3 class="heading">Popular Posts</h3>
+                    <div class="post-entry-sidebar">
+                        <ul>
+                            {% if popular_blogs %}
+                            {% for blog in popular_blogs %}
+                            <li>
+                                <a href="{% url 'blog_details' blog.slug %}">
+                                    {% if blog.images.all %}
+                                    <img src="{{ blog.images.all.0.image.url }}" alt="Image placeholder" class="mr-4">
+                                    {% else %}
+                                    <img src="{% static 'images/default.jpg' %}" alt="Image placeholder" class="mr-4">
+                                    {% endif %}
+                                    <div class="text">
+                                        <h4>{{ blog.short_title }}...</h4>
+                                        <div class="post-meta">
+                                            <span class="mr-2">{{ blog.created_at|date:"F d, Y" }}</span>
+                                        </div>
+                                    </div>
+                                </a>
+                            </li>
+                            {% endfor %}
+                            {% else %}
+                            <li>
+                                <p>No popular posts available.</p>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+                <!-- END sidebar-box -->
+            </div>
+            <!-- END sidebar -->
+
+        </div>
+    </div>
+</section>
+
+
+<script>
+    $(document).ready(function () {
+        $(".home-slider").owlCarousel({
+            items: 1,
+            loop: true,
+            autoplay: true,
+            autoplayTimeout: 4000,
+            autoplayHoverPause: true,
+            nav: true,
+            dots: true,
+            navText: [
+                "<span class='fa fa-chevron-left'></span>",
+                "<span class='fa fa-chevron-right'></span>"
+            ]
+        });
+    });
+</script>
+
+
+{% endblock content %}

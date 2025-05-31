@@ -1,0 +1,328 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Home Page{% endblock %}
+{% block content %}
+
+{% if results %}
+<section class="site-section pt-5 pb-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+
+                <div class="owl-carousel owl-theme home-slider">
+                    {% for blog in popular_blogs %}
+                    <div>
+
+                        {% if blog.images.all %}
+                        <a href="{% url 'blog_details' blog.slug %}" class="a-block d-flex align-items-center height-lg"
+                            style="background-image: url('{{ blog.images.all.0.image.url }}');">
+                            {% else %}
+                            <a href="{% url 'blog_details' blog.slug %}"
+                                class="a-block d-flex align-items-center height-lg"
+                                style="background-image: url('{% static 'images/img_1.jpg' %}');">
+                                {% endif %}
+                                <div class="text half-to-full">
+                                    <!-- <span class="category mb-5">{{ blog.category.name }}</span> -->
+                                    <div class="post-meta">
+                                        <span class="author mr-2">
+                                            <img src="{{ blog.author.profile.image.url }}" alt="Colorlib"> {{
+                                            blog.author.get_full_name }}
+                                        </span> &bullet;
+                                        <span class="mr-2">{{ blog.created_at|date:"F d, Y" }}</span> &bullet;
+                                        <span class="ml-2"><span class="fa fa-comments"></span> {{ blog.comments.count
+                                            }}</span>
+                                        <span class="ml-2"><span class="fa fa-eye"></span> {{ blog.views }}</span>
+                                        <span class="ml-2"><span class="fa fa-heart-o"></span> {{ blog.likes.count
+                                            }}</span>
+                                    </div>
+                                    <!-- <h2>{{ blog.title }}</h2> -->
+                                    {% if blog.short_title|length > 26 %}
+                                    <h3 class="mb-0">{{ blog.short_title|slice:":50" }}...</h3>
+                                    {% else %}
+                                    <h3 class="mb-0">{{ blog.title }}</h3>
+                                    {% endif %}
+
+                                    <p class="mb-0">
+                                        {% if blog.short_description|length > 99 %}
+                                        {{ blog.short_description|slice:":99" }}...
+                                        {% else %}
+                                        {{ blog.description }}
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </a>
+                    </div>
+                    {% endfor %}
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+<!-- END section -->
+
+<style>
+    /* Custom CSS for Unified Card */
+    .blog-card {
+        display: block;
+        transition: all 0.3s ease;
+        margin-bottom: 30px;
+        position: relative;
+        text-decoration: none !important;
+        color: inherit;
+        background: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .blog-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .card-image {
+        width: 100%;
+        height: 250px;
+        object-fit: cover;
+        border-bottom: 3px solid #f8f9fa;
+    }
+
+    .card-content {
+        padding: 20px;
+    }
+
+    .post-meta {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 15px;
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+
+    .author-info {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .author-img {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .post-date {
+        margin-left: auto;
+    }
+
+    .card-title {
+        font-size: 1.3rem;
+        margin-bottom: 15px;
+        color: #2c3e50;
+        line-height: 1.4;
+    }
+
+    .card-stats {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        color: #7f8c8d;
+    }
+
+    .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .author-hover:hover {
+        color: #6610F2;
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        padding: 5px;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .card-image {
+            height: 200px;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .card-image {
+            height: 180px;
+        }
+
+        .post-meta {
+            flex-wrap: wrap;
+        }
+
+        .post-date {
+            margin-left: 0;
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="container py-5">
+    <div class="row">
+            
+        {% for i in results %}
+        <div class="col-md-6 col-lg-4">
+            <div class="blog-card">
+                {% if i.images.all %}
+                <a href="{% url 'blog_details' slug=i.slug %}">
+                    <img src="{{ i.images.all.0.image.url }}" class="card-image" alt="{{ i.title }}">
+                    {% endif %}
+                </a>
+                
+                <div class="card-content">
+                    <a href="{% url 'view_user_profile' username=i.author.username %}">
+                        <div class="post-meta ">
+                            <div class="author-info author-hover">
+                                <img src="{{ i.author.profile.image.url }}" class="author-img"
+                                    alt="{{ i.author.username }}">
+                                <span>{{ i.author.get_full_name }}</span>
+                            </div>
+                            <span class="post-date">{{ i.created_at|date:"F j, Y" }}</span>
+                        </div>
+                    </a>
+                    <a href="{% url 'blog_details' slug=i.slug %}">
+                        
+                       {% if i.short_title|length > 26 %}
+                        <h2 class="card-title">{{ i.short_title|slice:":26" }}...</h2>
+                        {% else %}
+                        <h2 class="card-title">{{ i.title }}</h2>
+                        {% endif %}
+                        
+                        
+                        <div class="card-stats">
+                            <div class="stat-item" style="font-size: 14px;">
+                                <i class="fa fa-comments"></i>
+                                <span>{{ i.comments.count }} Comments</span>
+
+                                <!-- like blogs -->
+                                <form method="POST" action="{% url 'like_post' i.slug %}" class="mb-4">
+                                    {% csrf_token %}
+                                    <style>
+                                        .like-btn {
+                                            margin-top: 26px !important;
+                                            border: none !important;
+                                            border-radius: 5px !important;
+                                            cursor: pointer !important;
+                                            background: none !important;
+                                
+                                        }
+                                
+                                        .like-btn:hover {
+                                            color: #f21010 !important;
+                                            transform: translateY(-5px) !important;
+                                            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2) !important;
+                                            border-radius: 10px !important;
+                                            transition: all 0.3s ease !important;
+                                            padding: 5px !important;
+                                        }
+                                
+                                        .like {
+                                            color: #7F8C8D !important;
+                                            font-size: ;
+                                        }
+                                    </style>
+                                
+                                    {% if user in post.likes.all %}
+                                    <button type="submit">Unlike</button>
+                                    {% else %}
+                                    <button class="like-btn" type="submit">
+                                        {% if user in i.likes.all %}
+                                        <i style="margin-left:10px; color:red;" class="fa fa-heart"></i>
+                                        <span>{{ i.likes.count }} Likes</span>
+                                        {% else %}
+                                        <i style="margin-left:10px; color: #7F8C8D;" class="fa fa-heart-o"></i>
+                                        <span class="like">{{ i.likes.count }} Likes</span>
+                                        {% endif %}
+                                    </button>
+                                
+                                    {% endif %}
+                                </form>
+                                
+                                <!-- end like blogs -->
+                                
+                                <i style="margin-left:10px" class="fa fa-eye"></i>
+                                <span>{{ i.views }} Views</span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+            </div>
+        </div>
+        {% endfor %}
+        
+    </div>
+
+    <!-- pagination -->
+    <div class="row mt-5">
+        <div class="col-md-12 text-center">
+            <nav aria-label="Page navigation" class="text-center">
+                <ul class="pagination justify-content-center">
+
+                    {% if blog.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ blog.previous_page_number }}">&lt;</a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#">&lt;</a>
+                    </li>
+                    {% endif %}
+
+                    {% for num in blog.paginator.page_range %}
+                    <li class="page-item {% if blog.number == num %}active{% endif %}">
+                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                    </li>
+                    {% endfor %}
+
+                    {% if blog.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ blog.next_page_number }}">&gt;</a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#">&gt;</a>
+                    </li>
+                    {% endif %}
+
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+</div>
+
+
+{% else %}
+<style>
+    .no-results-found {
+        font-size: 3rem !important;
+        color: #e04242 !important;
+        margin: 150px !important;
+    }
+    .no-results-found i {
+        font-size: 3rem !important;
+        color: #f70505 !important;
+    }
+</style>
+<div class="col-md-12">
+    <h2 class="text-center no-results-found"><b>Blog Not Found</b> <i class="fa fa-ban" aria-hidden="true"></i></h2>
+    {% endif %}
+{% endblock content %}

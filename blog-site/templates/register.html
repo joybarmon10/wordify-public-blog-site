@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Login{% endblock %}
+{% block content %}
+<div class="blog-entries container">
+    <div class="main-content">
+        <form action="#" method="post">
+            {% csrf_token %}
+            <div class="">
+                <div class=" form-group">
+                    <label for="name">First Name</label>
+                    <input type="text" id="name" name="first_name" class="form-control ">
+                </div>
+                <div class=" form-group">
+                    <label for="name">Last Name</label>
+                    <input type="text" id="name" name="last_name" class="form-control ">
+                </div>
+                <div class=" form-group">
+                    <label for="name">Email</label>
+                    <input type="email" id="name" name="email" class="form-control ">
+                </div>
+                <div class=" form-group">
+                    <label for="name">Username</label>
+                    <input type="text" id="name" name="username" class="form-control ">
+                </div>
+                <div class=" form-group">
+                    <label for="name">Password</label>
+                    <input type="password" id="name" name="password" class="form-control ">
+                </div>
+                <div class=" form-group">
+                    <label for="name">Confirm Password</label>
+                    <input type="password" id="name" name="confirm_password" class="form-control ">
+                </div>
+
+            </div>
+            <button class="btn btn-primary mb-3" type="submit">register</button>
+        </form>
+    </div>
+
+</div>
+{% endblock %}
